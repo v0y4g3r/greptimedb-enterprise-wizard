@@ -52,9 +52,12 @@ function goToStep(step: number) {
   <div class="min-h-screen bg-gt-bg-primary">
     <!-- Header -->
     <header class="bg-gt-bg-surface shadow-sm border-b border-gt-border">
-      <div class="max-w-5xl mx-auto px-6 py-4">
-        <h1 class="text-xl font-bold text-gt-purple">GreptimeDB Enterprise Values Configurator</h1>
-        <p class="text-sm text-gt-footer mt-1">Configure your Helm chart values.yaml step by step</p>
+      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
+        <img src="/logo.svg" alt="GreptimeDB" class="h-8" />
+        <div>
+          <h1 class="text-xl font-bold text-gt-purple">Enterprise Values Configurator</h1>
+          <p class="text-sm text-gt-footer mt-0.5">Configure your Helm chart values.yaml step by step</p>
+        </div>
       </div>
     </header>
 
