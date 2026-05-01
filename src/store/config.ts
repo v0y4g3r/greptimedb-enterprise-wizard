@@ -1,0 +1,232 @@
+import { reactive } from 'vue'
+import type { AppConfig } from '../types/config'
+
+export const config: AppConfig = reactive({
+  clusterName: 'greptimedb',
+  image: {
+    registry: 'docker.io',
+    repository: 'greptime/greptimedb',
+    tag: 'v1.0.1',
+  },
+  customImageRegistry: {
+    enabled: false,
+    registry: '',
+    username: '',
+    password: '',
+  },
+  initializerImage: {
+    registry: 'docker.io',
+    repository: 'greptime/greptimedb-initializer',
+    tag: 'v0.5.5',
+  },
+  frontend: {
+    enabled: true,
+    replicas: 1,
+    resources: {
+      requests: { cpu: '500m', memory: '512Mi' },
+      limits: { cpu: '8', memory: '16Gi' },
+    },
+  },
+  meta: {
+    replicas: 1,
+    resources: {
+      requests: { cpu: '500m', memory: '512Mi' },
+      limits: { cpu: '2', memory: '4Gi' },
+    },
+    backendStorage: {
+      type: 'etcd',
+      etcd: {
+        endpoints: ['etcd.etcd-cluster.svc.cluster.local:2379'],
+        storeKeyPrefix: '',
+      },
+      mysql: {
+        host: '',
+        port: 3306,
+        database: '',
+        table: '',
+        credentials: {
+          username: '',
+          password: '',
+          existingSecretName: '',
+        },
+      },
+      postgresql: {
+        host: '',
+        port: 5432,
+        database: '',
+        table: '',
+        electionLockID: '',
+        credentials: {
+          username: '',
+          password: '',
+          existingSecretName: '',
+        },
+      },
+    },
+  },
+  datanode: {
+    enabled: true,
+    replicas: 3,
+    resources: {
+      requests: { cpu: '500m', memory: '512Mi' },
+      limits: { cpu: '8', memory: '16Gi' },
+    },
+    storage: {
+      storageClassName: '',
+      storageSize: '20Gi',
+      storageRetainPolicy: 'Retain',
+    },
+  },
+  flownode: {
+    enabled: false,
+    replicas: 1,
+    resources: {
+      requests: { cpu: '500m', memory: '512Mi' },
+      limits: { cpu: '2', memory: '4Gi' },
+    },
+  },
+  objectStorage: {
+    type: 'none',
+    credentials: {
+      accessKeyId: '',
+      secretAccessKey: '',
+      existingSecretName: '',
+    },
+    s3: {
+      bucket: '',
+      region: '',
+      root: '',
+      endpoint: '',
+      enableVirtualHostStyle: false,
+    },
+    gcs: {
+      bucket: '',
+      scope: '',
+      root: '',
+      endpoint: '',
+    },
+    azblob: {
+      container: '',
+      endpoint: '',
+      root: '',
+    },
+    oss: {
+      bucket: '',
+      region: '',
+      root: '',
+      endpoint: '',
+    },
+    cache: {
+      enabled: false,
+      cacheCapacity: '5Gi',
+      storageClassName: '',
+      storageSize: '10Gi',
+    },
+  },
+  wal: {
+    remote: {
+      enabled: false,
+      kafkaBrokerEndpoints: [],
+    },
+    dedicated: {
+      enabled: false,
+      storage: {
+        storageClassName: '',
+        storageSize: '20Gi',
+      },
+    },
+  },
+  enterprise: {
+    license: {
+      enabled: false,
+      data: '',
+    },
+    auth: {
+      enabled: false,
+      useBuiltIn: false,
+      users: [],
+    },
+    remoteCompaction: {
+      enabled: false,
+      scheduler: {
+        image: {
+          registry: 'docker.io',
+          repository: 'greptime/greptimedb-remote-compaction-scheduler',
+          tag: 'latest',
+        },
+        replicas: 1,
+      },
+      compactor: {
+        image: {
+          registry: 'docker.io',
+          repository: 'greptime/greptimedb-remote-compaction-compactor',
+          tag: 'latest',
+        },
+        replicas: 1,
+      },
+    },
+    dashboard: {
+      enabled: false,
+      image: {
+        registry: 'docker.io',
+        repository: 'greptime/greptimedb-enterprise-dashboard',
+        tag: 'latest',
+      },
+      replicas: 1,
+    },
+    regionFailover: false,
+  },
+  monitoringObservability: {
+    monitoring: {
+      enabled: false,
+      resources: {
+        cpu: '500m',
+        memory: '512Mi',
+      },
+    },
+    grafana: {
+      enabled: false,
+      adminUser: 'admin',
+      adminPassword: '',
+      persistenceEnabled: false,
+      persistenceSize: '1Gi',
+    },
+    jaeger: {
+      enabled: false,
+    },
+    tracing: {
+      enabled: false,
+      endpoint: '',
+      sampleRatio: '1.0',
+    },
+    slowQuery: {
+      enabled: true,
+      threshold: '30s',
+      ttl: '30d',
+    },
+    prometheus: {
+      monitorEnabled: false,
+      ruleEnabled: false,
+    },
+  },
+  logging: {
+    level: 'info',
+    format: 'text',
+  },
+  ingress: {
+    enabled: false,
+    ingressClassName: '',
+    rules: [],
+  },
+})
+
+export const steps = [
+  { id: 1, title: 'Cluster Basics', description: 'Image and naming' },
+  { id: 2, title: 'Components', description: 'Enable components and set required resource requests/limits' },
+  { id: 3, title: 'Meta Backend', description: 'etcd, MySQL, or PostgreSQL' },
+  { id: 4, title: 'Object Storage', description: 'S3, GCS, Azure, OSS' },
+  { id: 5, title: 'WAL Configuration', description: 'Local or Remote (Kafka)' },
+  { id: 6, title: 'Enterprise Features', description: 'License, Auth, Dashboard' },
+  { id: 7, title: 'Monitoring', description: 'Grafana, Jaeger, Tracing' },
+  { id: 8, title: 'Review & Generate', description: 'Download values.yaml' },
+]
