@@ -4,12 +4,12 @@ import type { AppConfig } from '../types/config'
 export const config: AppConfig = reactive({
   clusterName: 'greptimedb',
   image: {
-    registry: 'docker.io',
+    registry: '',
     repository: 'greptime/greptimedb',
     tag: 'v1.0.1',
   },
   customImageRegistry: {
-    enabled: false,
+    enabled: true,
     registry: '',
     username: '',
     password: '',

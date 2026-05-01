@@ -29,13 +29,14 @@ export function generateValuesYaml(config: AppConfig): string {
 
   // Image
   const imageLines: string[] = []
-  imageLines.push(yamlKey('registry', config.image.registry))
+  imageLines.push(yamlKey('registry', config.customImageRegistry.registry))
   imageLines.push(yamlKey('repository', config.image.repository))
   imageLines.push(yamlKey('tag', config.image.tag))
+  imageLines.push(`pullSecrets:\n  - "greptimedb-custom-image-pull-secret"`)
   sections.push(`image:\n${indent(imageLines.join('\n'), 1)}`)
 
   // Custom Image Registry
-  if (config.customImageRegistry.enabled) {
+  {
     const lines: string[] = []
     lines.push(yamlKey('enabled', true))
     lines.push(yamlKey('registry', config.customImageRegistry.registry))
