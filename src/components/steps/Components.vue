@@ -22,19 +22,25 @@ const allValid = computed(() => frontendValid.value && metaValid.value && datano
 
 const setStepValid = inject<(step: number, valid: boolean) => void>('setStepValid')!
 watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
+
+function resourceInputClass(filled: boolean): string {
+  return filled
+    ? 'mt-1 block w-full rounded-md shadow-sm focus:ring-gt-accent sm:text-sm border p-2 border-gt-border focus:border-gt-accent'
+    : 'mt-1 block w-full rounded-md shadow-sm focus:ring-gt-accent sm:text-sm border p-2 border-red-300 focus:border-red-500'
+}
 </script>
 
 <template>
   <div class="space-y-6">
-    <p class="text-sm text-gray-600">
-      Meta is always deployed. Toggle other components and <strong>explicitly set resource requests and limits</strong> for each enabled component.
+    <p class="text-sm text-gt-footer">
+      Meta is always deployed. Toggle other components and <strong class="text-gt-purple">explicitly set resource requests and limits</strong> for each enabled component.
     </p>
     <div v-if="!allValid" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
       All enabled components must have resource requests and limits set before proceeding.
     </div>
 
     <!-- Frontend -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.frontend.enabled"
         label="Frontend"
@@ -47,58 +53,26 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
             type="number"
             min="1"
             max="10"
-            class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-32 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
           />
         </FormField>
-        <div class="border-t border-gray-100 pt-4">
-          <h4 class="text-xs font-semibold text-gray-700 mb-3">
+        <div class="border-t border-gt-border pt-4">
+          <h4 class="text-xs font-semibold text-gt-purple mb-3">
             Resources
             <span v-if="!frontendValid" class="text-red-500 ml-1">(required)</span>
           </h4>
           <div class="grid grid-cols-2 gap-4">
             <FormField label="CPU Request" required>
-              <input
-                v-model="config.frontend.resources.requests.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.frontend.resources.requests.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 500m"
-              />
+              <input v-model="config.frontend.resources.requests.cpu" type="text" :class="resourceInputClass(!!config.frontend.resources.requests.cpu)" placeholder="e.g. 500m" />
             </FormField>
             <FormField label="Memory Request" required>
-              <input
-                v-model="config.frontend.resources.requests.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.frontend.resources.requests.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 512Mi"
-              />
+              <input v-model="config.frontend.resources.requests.memory" type="text" :class="resourceInputClass(!!config.frontend.resources.requests.memory)" placeholder="e.g. 512Mi" />
             </FormField>
             <FormField label="CPU Limit" required>
-              <input
-                v-model="config.frontend.resources.limits.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.frontend.resources.limits.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 2"
-              />
+              <input v-model="config.frontend.resources.limits.cpu" type="text" :class="resourceInputClass(!!config.frontend.resources.limits.cpu)" placeholder="e.g. 8" />
             </FormField>
             <FormField label="Memory Limit" required>
-              <input
-                v-model="config.frontend.resources.limits.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.frontend.resources.limits.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 4Gi"
-              />
+              <input v-model="config.frontend.resources.limits.memory" type="text" :class="resourceInputClass(!!config.frontend.resources.limits.memory)" placeholder="e.g. 16Gi" />
             </FormField>
           </div>
         </div>
@@ -106,13 +80,13 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
     </div>
 
     <!-- Meta (always enabled) -->
-    <div class="border border-gray-200 rounded-lg p-4 bg-blue-50/50">
+    <div class="border border-gt-border rounded-lg p-4 bg-gt-purple-bg/30">
       <div class="flex items-center justify-between py-3">
         <div>
-          <label class="text-sm font-medium text-gray-700">Meta (Metadata Service)</label>
-          <p class="text-xs text-gray-500 mt-0.5">Always deployed — manages catalogs, schemas, tables, and regions</p>
+          <label class="text-sm font-medium text-gt-purple">Meta (Metadata Service)</label>
+          <p class="text-xs text-gt-footer mt-0.5">Always deployed — manages catalogs, schemas, tables, and regions</p>
         </div>
-        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Always On</span>
+        <span class="text-xs bg-gt-accent/10 text-gt-accent px-2 py-1 rounded-full font-medium">Always On</span>
       </div>
       <div class="mt-4 space-y-4">
         <FormField label="Replicas">
@@ -121,58 +95,26 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
             type="number"
             min="1"
             max="5"
-            class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-32 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
           />
         </FormField>
-        <div class="border-t border-gray-100 pt-4">
-          <h4 class="text-xs font-semibold text-gray-700 mb-3">
+        <div class="border-t border-gt-border pt-4">
+          <h4 class="text-xs font-semibold text-gt-purple mb-3">
             Resources
             <span v-if="!metaValid" class="text-red-500 ml-1">(required)</span>
           </h4>
           <div class="grid grid-cols-2 gap-4">
             <FormField label="CPU Request" required>
-              <input
-                v-model="config.meta.resources.requests.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.meta.resources.requests.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 500m"
-              />
+              <input v-model="config.meta.resources.requests.cpu" type="text" :class="resourceInputClass(!!config.meta.resources.requests.cpu)" placeholder="e.g. 500m" />
             </FormField>
             <FormField label="Memory Request" required>
-              <input
-                v-model="config.meta.resources.requests.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.meta.resources.requests.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 512Mi"
-              />
+              <input v-model="config.meta.resources.requests.memory" type="text" :class="resourceInputClass(!!config.meta.resources.requests.memory)" placeholder="e.g. 512Mi" />
             </FormField>
             <FormField label="CPU Limit" required>
-              <input
-                v-model="config.meta.resources.limits.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.meta.resources.limits.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 2"
-              />
+              <input v-model="config.meta.resources.limits.cpu" type="text" :class="resourceInputClass(!!config.meta.resources.limits.cpu)" placeholder="e.g. 2" />
             </FormField>
             <FormField label="Memory Limit" required>
-              <input
-                v-model="config.meta.resources.limits.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.meta.resources.limits.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 4Gi"
-              />
+              <input v-model="config.meta.resources.limits.memory" type="text" :class="resourceInputClass(!!config.meta.resources.limits.memory)" placeholder="e.g. 4Gi" />
             </FormField>
           </div>
         </div>
@@ -180,7 +122,7 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
     </div>
 
     <!-- Datanode -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.datanode.enabled"
         label="Datanode"
@@ -193,69 +135,37 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
             type="number"
             min="1"
             max="10"
-            class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-32 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
           />
         </FormField>
-        <div class="border-t border-gray-100 pt-4">
-          <h4 class="text-xs font-semibold text-gray-700 mb-3">
+        <div class="border-t border-gt-border pt-4">
+          <h4 class="text-xs font-semibold text-gt-purple mb-3">
             Resources
             <span v-if="!datanodeValid" class="text-red-500 ml-1">(required)</span>
           </h4>
           <div class="grid grid-cols-2 gap-4">
             <FormField label="CPU Request" required>
-              <input
-                v-model="config.datanode.resources.requests.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.datanode.resources.requests.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 500m"
-              />
+              <input v-model="config.datanode.resources.requests.cpu" type="text" :class="resourceInputClass(!!config.datanode.resources.requests.cpu)" placeholder="e.g. 500m" />
             </FormField>
             <FormField label="Memory Request" required>
-              <input
-                v-model="config.datanode.resources.requests.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.datanode.resources.requests.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 512Mi"
-              />
+              <input v-model="config.datanode.resources.requests.memory" type="text" :class="resourceInputClass(!!config.datanode.resources.requests.memory)" placeholder="e.g. 512Mi" />
             </FormField>
             <FormField label="CPU Limit" required>
-              <input
-                v-model="config.datanode.resources.limits.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.datanode.resources.limits.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 2"
-              />
+              <input v-model="config.datanode.resources.limits.cpu" type="text" :class="resourceInputClass(!!config.datanode.resources.limits.cpu)" placeholder="e.g. 8" />
             </FormField>
             <FormField label="Memory Limit" required>
-              <input
-                v-model="config.datanode.resources.limits.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.datanode.resources.limits.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 4Gi"
-              />
+              <input v-model="config.datanode.resources.limits.memory" type="text" :class="resourceInputClass(!!config.datanode.resources.limits.memory)" placeholder="e.g. 16Gi" />
             </FormField>
           </div>
         </div>
-        <div class="border-t border-gray-100 pt-4">
-          <h4 class="text-xs font-semibold text-gray-700 mb-3">Storage</h4>
+        <div class="border-t border-gt-border pt-4">
+          <h4 class="text-xs font-semibold text-gt-purple mb-3">Storage</h4>
           <div class="grid grid-cols-3 gap-4">
             <FormField label="Storage Class Name" description="Leave empty for default">
               <input
                 v-model="config.datanode.storage.storageClassName"
                 type="text"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
                 placeholder="default"
               />
             </FormField>
@@ -263,14 +173,14 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
               <input
                 v-model="config.datanode.storage.storageSize"
                 type="text"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
                 placeholder="20Gi"
               />
             </FormField>
             <FormField label="Retain Policy">
               <select
                 v-model="config.datanode.storage.storageRetainPolicy"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               >
                 <option value="Retain">Retain</option>
                 <option value="Delete">Delete</option>
@@ -283,7 +193,7 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
     </div>
 
     <!-- Flownode -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.flownode.enabled"
         label="Flownode"
@@ -296,58 +206,26 @@ watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
             type="number"
             min="1"
             max="10"
-            class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-32 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
           />
         </FormField>
-        <div class="border-t border-gray-100 pt-4">
-          <h4 class="text-xs font-semibold text-gray-700 mb-3">
+        <div class="border-t border-gt-border pt-4">
+          <h4 class="text-xs font-semibold text-gt-purple mb-3">
             Resources
             <span v-if="!flownodeValid" class="text-red-500 ml-1">(required)</span>
           </h4>
           <div class="grid grid-cols-2 gap-4">
             <FormField label="CPU Request" required>
-              <input
-                v-model="config.flownode.resources.requests.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.flownode.resources.requests.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 500m"
-              />
+              <input v-model="config.flownode.resources.requests.cpu" type="text" :class="resourceInputClass(!!config.flownode.resources.requests.cpu)" placeholder="e.g. 500m" />
             </FormField>
             <FormField label="Memory Request" required>
-              <input
-                v-model="config.flownode.resources.requests.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.flownode.resources.requests.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 512Mi"
-              />
+              <input v-model="config.flownode.resources.requests.memory" type="text" :class="resourceInputClass(!!config.flownode.resources.requests.memory)" placeholder="e.g. 512Mi" />
             </FormField>
             <FormField label="CPU Limit" required>
-              <input
-                v-model="config.flownode.resources.limits.cpu"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.flownode.resources.limits.cpu ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 2"
-              />
+              <input v-model="config.flownode.resources.limits.cpu" type="text" :class="resourceInputClass(!!config.flownode.resources.limits.cpu)" placeholder="e.g. 2" />
             </FormField>
             <FormField label="Memory Limit" required>
-              <input
-                v-model="config.flownode.resources.limits.memory"
-                type="text"
-                :class="[
-                  'mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm border p-2',
-                  !config.flownode.resources.limits.memory ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
-                ]"
-                placeholder="e.g. 4Gi"
-              />
+              <input v-model="config.flownode.resources.limits.memory" type="text" :class="resourceInputClass(!!config.flownode.resources.limits.memory)" placeholder="e.g. 4Gi" />
             </FormField>
           </div>
         </div>

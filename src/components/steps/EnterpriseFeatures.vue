@@ -2,7 +2,6 @@
 import { config } from '../../store/config'
 import FormField from '../ui/FormField.vue'
 import ToggleSwitch from '../ui/ToggleSwitch.vue'
-import type { AuthUser } from '../../types/config'
 
 function addUser() {
   config.enterprise.auth.users.push({
@@ -20,7 +19,7 @@ function removeUser(index: number) {
 <template>
   <div class="space-y-6">
     <!-- License -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.enterprise.license.enabled"
         label="Enterprise License"
@@ -30,7 +29,7 @@ function removeUser(index: number) {
         <FormField label="License Data" description="Paste your license file contents or use --set-file at install time">
           <textarea
             v-model="config.enterprise.license.data"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 font-mono text-xs"
+            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2 font-mono text-xs"
             rows="4"
             placeholder="Paste license content here (optional)"
           />
@@ -39,7 +38,7 @@ function removeUser(index: number) {
     </div>
 
     <!-- Authentication -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.enterprise.auth.enabled"
         label="Authentication"
@@ -53,33 +52,33 @@ function removeUser(index: number) {
         />
         <div>
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs font-semibold text-gray-700">Users</h4>
+            <h4 class="text-xs font-semibold text-gt-purple">Users</h4>
             <button
-              class="text-sm text-blue-600 hover:text-blue-800"
+              class="text-sm text-gt-accent hover:text-gt-accent-hover"
               @click="addUser"
             >
               + Add user
             </button>
           </div>
-          <div v-for="(user, index) in config.enterprise.auth.users" :key="index" class="flex items-end gap-3 mb-3 p-3 bg-gray-50 rounded">
+          <div v-for="(user, index) in config.enterprise.auth.users" :key="index" class="flex items-end gap-3 mb-3 p-3 bg-gt-bg-primary rounded">
             <FormField label="Username">
               <input
                 v-model="user.username"
                 type="text"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               />
             </FormField>
             <FormField label="Password">
               <input
                 v-model="user.password"
                 type="password"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               />
             </FormField>
             <FormField label="Permission">
               <select
                 v-model="user.permission"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               >
                 <option value="readwrite">Read/Write</option>
                 <option value="readonly">Read Only</option>
@@ -93,13 +92,13 @@ function removeUser(index: number) {
               Remove
             </button>
           </div>
-          <p v-if="config.enterprise.auth.users.length === 0" class="text-xs text-gray-400">No users configured</p>
+          <p v-if="config.enterprise.auth.users.length === 0" class="text-xs text-gt-muted">No users configured</p>
         </div>
       </div>
     </div>
 
     <!-- Remote Compaction -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.enterprise.remoteCompaction.enabled"
         label="Remote Compaction"
@@ -107,25 +106,25 @@ function removeUser(index: number) {
       />
       <div v-if="config.enterprise.remoteCompaction.enabled" class="mt-4 space-y-4">
         <div class="grid grid-cols-2 gap-4">
-          <div class="p-3 bg-gray-50 rounded space-y-3">
-            <h4 class="text-xs font-semibold text-gray-700">Scheduler</h4>
+          <div class="p-3 bg-gt-bg-primary rounded space-y-3">
+            <h4 class="text-xs font-semibold text-gt-purple">Scheduler</h4>
             <FormField label="Replicas">
               <input
                 v-model.number="config.enterprise.remoteCompaction.scheduler.replicas"
                 type="number"
                 min="1"
-                class="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-24 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               />
             </FormField>
           </div>
-          <div class="p-3 bg-gray-50 rounded space-y-3">
-            <h4 class="text-xs font-semibold text-gray-700">Compactor</h4>
+          <div class="p-3 bg-gt-bg-primary rounded space-y-3">
+            <h4 class="text-xs font-semibold text-gt-purple">Compactor</h4>
             <FormField label="Replicas">
               <input
                 v-model.number="config.enterprise.remoteCompaction.compactor.replicas"
                 type="number"
                 min="1"
-                class="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                class="mt-1 block w-24 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               />
             </FormField>
           </div>
@@ -134,7 +133,7 @@ function removeUser(index: number) {
     </div>
 
     <!-- Enterprise Dashboard -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.enterprise.dashboard.enabled"
         label="Enterprise Dashboard"
@@ -146,14 +145,14 @@ function removeUser(index: number) {
             v-model.number="config.enterprise.dashboard.replicas"
             type="number"
             min="1"
-            class="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-24 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
           />
         </FormField>
       </div>
     </div>
 
     <!-- Region Failover -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.enterprise.regionFailover"
         label="Region Failover"

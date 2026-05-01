@@ -49,12 +49,12 @@ const summary = computed(() => {
 <template>
   <div class="space-y-6">
     <!-- Summary -->
-    <div class="bg-gray-50 rounded-lg p-4">
-      <h3 class="text-sm font-semibold text-gray-800 mb-3">Configuration Summary</h3>
+    <div class="bg-gt-bg-primary rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-gt-purple mb-3">Configuration Summary</h3>
       <dl class="grid grid-cols-2 gap-x-6 gap-y-2">
         <div v-for="item in summary" :key="item.label" class="flex">
-          <dt class="text-xs text-gray-500 w-32 flex-shrink-0">{{ item.label }}</dt>
-          <dd class="text-xs font-medium text-gray-800">{{ item.value }}</dd>
+          <dt class="text-xs text-gt-footer w-32 flex-shrink-0">{{ item.label }}</dt>
+          <dd class="text-xs font-medium text-gt-purple">{{ item.value }}</dd>
         </div>
       </dl>
     </div>
@@ -62,13 +62,13 @@ const summary = computed(() => {
     <!-- Actions -->
     <div class="flex gap-3">
       <button
-        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gt-accent border border-transparent rounded-md hover:bg-gt-accent-hover focus:outline-none focus:ring-2 focus:ring-gt-accent"
         @click="downloadYaml"
       >
         Download values.yaml
       </button>
       <button
-        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gt-purple bg-gt-bg-surface border border-gt-border rounded-md hover:bg-gt-bg-primary focus:outline-none focus:ring-2 focus:ring-gt-accent"
         @click="copyToClipboard"
       >
         {{ copied ? 'Copied!' : 'Copy to clipboard' }}
@@ -77,7 +77,7 @@ const summary = computed(() => {
 
     <!-- YAML Preview -->
     <div>
-      <h3 class="text-sm font-semibold text-gray-800 mb-3">Generated values.yaml</h3>
+      <h3 class="text-sm font-semibold text-gt-purple mb-3">Generated values.yaml</h3>
       <CodePreview :code="yaml" />
     </div>
   </div>

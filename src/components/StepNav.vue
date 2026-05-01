@@ -12,10 +12,10 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="flex justify-between pt-6 border-t border-gray-200 mt-8">
+  <div class="flex justify-between pt-6 border-t border-gt-border mt-8">
     <button
       v-if="currentStep > 1"
-      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="px-4 py-2 text-sm font-medium text-gt-purple bg-gt-bg-surface border border-gt-border rounded-md hover:bg-gt-bg-primary focus:outline-none focus:ring-2 focus:ring-gt-accent"
       @click="$emit('back')"
     >
       Back
@@ -23,7 +23,7 @@ defineEmits<{
     <div v-else></div>
     <button
       v-if="currentStep < totalSteps"
-      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      class="px-4 py-2 text-sm font-medium text-white bg-gt-accent border border-transparent rounded-md hover:bg-gt-accent-hover focus:outline-none focus:ring-2 focus:ring-gt-accent disabled:opacity-50 disabled:cursor-not-allowed"
       :disabled="!canProceed"
       @click="$emit('next')"
     >

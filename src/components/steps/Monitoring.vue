@@ -7,7 +7,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
 <template>
   <div class="space-y-6">
     <!-- Monitoring Standalone -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.monitoringObservability.monitoring.enabled"
         label="Monitoring Standalone"
@@ -19,7 +19,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
             <input
               v-model="config.monitoringObservability.monitoring.resources.cpu"
               type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+              class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               placeholder="500m"
             />
           </FormField>
@@ -27,7 +27,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
             <input
               v-model="config.monitoringObservability.monitoring.resources.memory"
               type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+              class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               placeholder="512Mi"
             />
           </FormField>
@@ -36,7 +36,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
     </div>
 
     <!-- Grafana -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.monitoringObservability.grafana.enabled"
         label="Grafana"
@@ -48,7 +48,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
             <input
               v-model="config.monitoringObservability.grafana.adminUser"
               type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+              class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
               placeholder="admin"
             />
           </FormField>
@@ -56,7 +56,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
             <input
               v-model="config.monitoringObservability.grafana.adminPassword"
               type="password"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+              class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
             />
           </FormField>
         </div>
@@ -69,7 +69,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
           <input
             v-model="config.monitoringObservability.grafana.persistenceSize"
             type="text"
-            class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-32 rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
             placeholder="1Gi"
           />
         </FormField>
@@ -77,7 +77,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
     </div>
 
     <!-- Jaeger -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.monitoringObservability.jaeger.enabled"
         label="Jaeger"
@@ -86,7 +86,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
     </div>
 
     <!-- Tracing -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.monitoringObservability.tracing.enabled"
         label="OpenTelemetry Tracing"
@@ -97,7 +97,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
           <input
             v-model="config.monitoringObservability.tracing.endpoint"
             type="text"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
             placeholder="http://jaeger:4317"
           />
         </FormField>
@@ -105,7 +105,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
           <input
             v-model="config.monitoringObservability.tracing.sampleRatio"
             type="text"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
             placeholder="1.0"
           />
         </FormField>
@@ -113,7 +113,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
     </div>
 
     <!-- Slow Query -->
-    <div class="border border-gray-200 rounded-lg p-4">
+    <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
         v-model="config.monitoringObservability.slowQuery.enabled"
         label="Slow Query Logging"
@@ -124,7 +124,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
           <input
             v-model="config.monitoringObservability.slowQuery.threshold"
             type="text"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
             placeholder="30s"
           />
         </FormField>
@@ -132,7 +132,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
           <input
             v-model="config.monitoringObservability.slowQuery.ttl"
             type="text"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
             placeholder="30d"
           />
         </FormField>
@@ -140,7 +140,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
     </div>
 
     <!-- Prometheus -->
-    <div class="border border-gray-200 rounded-lg p-4 space-y-2">
+    <div class="border border-gt-border rounded-lg p-4 space-y-2">
       <ToggleSwitch
         v-model="config.monitoringObservability.prometheus.monitorEnabled"
         label="Prometheus PodMonitor"

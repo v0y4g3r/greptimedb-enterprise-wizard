@@ -49,12 +49,12 @@ function goToStep(step: number) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gt-bg-primary">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
+    <header class="bg-gt-bg-surface shadow-sm border-b border-gt-border">
       <div class="max-w-5xl mx-auto px-6 py-4">
-        <h1 class="text-xl font-bold text-gray-900">GreptimeDB Enterprise Values Configurator</h1>
-        <p class="text-sm text-gray-500 mt-1">Configure your Helm chart values.yaml step by step</p>
+        <h1 class="text-xl font-bold text-gt-purple">GreptimeDB Enterprise Values Configurator</h1>
+        <p class="text-sm text-gt-footer mt-1">Configure your Helm chart values.yaml step by step</p>
       </div>
     </header>
 
@@ -62,12 +62,12 @@ function goToStep(step: number) {
       <!-- Progress bar -->
       <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-gray-700">Step {{ currentStep }} of {{ steps.length }}</span>
-          <span class="text-sm text-gray-500">{{ steps[currentStep - 1].title }}</span>
+          <span class="text-sm font-medium text-gt-purple">Step {{ currentStep }} of {{ steps.length }}</span>
+          <span class="text-sm text-gt-footer">{{ steps[currentStep - 1].title }}</span>
         </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="w-full bg-gt-border rounded-full h-2">
           <div
-            class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            class="bg-gt-accent h-2 rounded-full transition-all duration-300"
             :style="{ width: progress + '%' }"
           />
         </div>
@@ -81,10 +81,10 @@ function goToStep(step: number) {
           :class="[
             'px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
             step.id === currentStep
-              ? 'bg-blue-600 text-white'
+              ? 'bg-gt-accent text-white'
               : step.id < currentStep
-              ? 'bg-blue-100 text-blue-700 cursor-pointer hover:bg-blue-200'
-              : 'bg-gray-100 text-gray-400 cursor-default'
+              ? 'bg-gt-purple-bg text-gt-accent-dark cursor-pointer hover:bg-gt-accent-lightest'
+              : 'bg-gt-border/60 text-gt-muted cursor-default'
           ]"
           @click="goToStep(step.id)"
         >
@@ -93,9 +93,9 @@ function goToStep(step: number) {
       </nav>
 
       <!-- Step content -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-1">{{ steps[currentStep - 1].title }}</h2>
-        <p class="text-sm text-gray-500 mb-6">{{ steps[currentStep - 1].description }}</p>
+      <div class="bg-gt-bg-surface rounded-lg shadow-sm border border-gt-border p-6">
+        <h2 class="text-lg font-semibold text-gt-purple mb-1">{{ steps[currentStep - 1].title }}</h2>
+        <p class="text-sm text-gt-footer mb-6">{{ steps[currentStep - 1].description }}</p>
 
         <slot :current-step="currentStep" />
 

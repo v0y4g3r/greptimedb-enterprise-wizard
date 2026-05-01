@@ -18,7 +18,7 @@ defineEmits<{
 
 <template>
   <div class="space-y-2">
-    <label class="text-sm font-medium text-gray-700">{{ label }}</label>
+    <label class="text-sm font-medium text-gt-purple">{{ label }}</label>
     <div class="space-y-2 mt-1">
       <div
         v-for="option in options"
@@ -30,13 +30,13 @@ defineEmits<{
             type="radio"
             :value="option.value"
             :checked="modelValue === option.value"
-            class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+            class="h-4 w-4 border-gt-border text-gt-accent focus:ring-gt-accent"
             @change="$emit('update:modelValue', option.value)"
           />
         </div>
         <div class="ml-3">
-          <span class="text-sm font-medium text-gray-700">{{ option.label }}</span>
-          <p v-if="option.description" class="text-xs text-gray-500">{{ option.description }}</p>
+          <span class="text-sm font-medium text-gt-purple">{{ option.label }}</span>
+          <p v-if="option.description" class="text-xs text-gt-footer">{{ option.description }}</p>
         </div>
       </div>
     </div>
