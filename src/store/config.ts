@@ -1,7 +1,9 @@
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import type { AppConfig } from '../types/config'
 
-export const config: AppConfig = reactive({
+const STORAGE_KEY = 'greptimedb-configurator'
+
+const defaults: AppConfig = {
   clusterName: 'greptimedb',
   image: {
     registry: '',
@@ -26,6 +28,7 @@ export const config: AppConfig = reactive({
       requests: { cpu: '500m', memory: '512Mi' },
       limits: { cpu: '8', memory: '16Gi' },
     },
+    configData: '',
   },
   meta: {
     replicas: 1,
@@ -33,6 +36,7 @@ export const config: AppConfig = reactive({
       requests: { cpu: '500m', memory: '512Mi' },
       limits: { cpu: '2', memory: '4Gi' },
     },
+    configData: '',
     backendStorage: {
       type: 'etcd',
       etcd: {
@@ -76,6 +80,7 @@ export const config: AppConfig = reactive({
       storageSize: '20Gi',
       storageRetainPolicy: 'Retain',
     },
+    configData: '',
   },
   flownode: {
     enabled: false,
@@ -84,6 +89,7 @@ export const config: AppConfig = reactive({
       requests: { cpu: '500m', memory: '512Mi' },
       limits: { cpu: '2', memory: '4Gi' },
     },
+    configData: '',
   },
   objectStorage: {
     type: 'none',
@@ -218,7 +224,55 @@ export const config: AppConfig = reactive({
     ingressClassName: '',
     rules: [],
   },
-})
+}
+
+function deepMerge(target: any, source: any): any {
+  for (const key of Object.keys(source)) {
+    if (
+      source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
+      target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])
+    ) {
+      deepMerge(target[key], source[key])
+    } else if (key in target) {
+      target[key] = source[key]
+    }
+  }
+  return target
+}
+
+function loadSavedConfig(): AppConfig {
+  const merged = JSON.parse(JSON.stringify(defaults))
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const saved = JSON.parse(raw)
+      deepMerge(merged, saved)
+    }
+  } catch { /* ignore corrupt storage */ }
+  return merged
+}
+
+export const config: AppConfig = reactive(loadSavedConfig())
+
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+watch(
+  () => config,
+  () => {
+    if (saveTimer) clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
+      } catch { /* quota exceeded, ignore */ }
+    }, 500)
+  },
+  { deep: true },
+)
+
+export function resetConfig() {
+  const fresh = JSON.parse(JSON.stringify(defaults))
+  Object.assign(config, fresh)
+  localStorage.removeItem(STORAGE_KEY)
+}
 
 export const steps = [
   { id: 1, title: 'Cluster Basics', description: 'Image and naming' },

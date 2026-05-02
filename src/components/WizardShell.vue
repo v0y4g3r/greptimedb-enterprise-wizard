@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, provide } from 'vue'
-import { steps } from '../store/config'
+import { steps, resetConfig } from '../store/config'
 import StepNav from './StepNav.vue'
 
+const showResetConfirm = ref(false)
 const currentStep = ref(1)
 
 const progress = computed(() => ((currentStep.value - 1) / (steps.length - 1)) * 100)
@@ -46,6 +47,12 @@ function goToStep(step: number) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
+
+function handleReset() {
+  resetConfig()
+  currentStep.value = 1
+  showResetConfirm.value = false
+}
 </script>
 
 <template>
@@ -54,10 +61,16 @@ function goToStep(step: number) {
     <header class="bg-gt-bg-surface shadow-sm border-b border-gt-border">
       <div class="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
         <img src="/logo.svg" alt="GreptimeDB" class="h-8" />
-        <div>
+        <div class="flex-1">
           <h1 class="text-xl font-bold text-gt-purple">Enterprise Values Configurator</h1>
           <p class="text-sm text-gt-footer mt-0.5">Configure your Helm chart values.yaml step by step</p>
         </div>
+        <button
+          class="text-xs text-gt-footer hover:text-red-600 transition-colors px-3 py-1.5 rounded-md border border-gt-border hover:border-red-300"
+          @click="showResetConfirm = true"
+        >
+          Reset
+        </button>
       </div>
     </header>
 
@@ -111,5 +124,29 @@ function goToStep(step: number) {
         />
       </div>
     </div>
+
+    <!-- Reset confirmation modal -->
+    <Teleport to="body">
+      <div v-if="showResetConfirm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-gt-bg-surface rounded-lg shadow-xl border border-gt-border p-6 max-w-sm w-full mx-4">
+          <h3 class="text-lg font-semibold text-gt-purple mb-2">Reset all settings?</h3>
+          <p class="text-sm text-gt-footer mb-6">This will clear all saved configuration and reload with defaults. This cannot be undone.</p>
+          <div class="flex justify-end gap-3">
+            <button
+              class="px-4 py-2 text-sm font-medium text-gt-purple border border-gt-border rounded-md hover:bg-gt-bg-primary transition-colors"
+              @click="showResetConfirm = false"
+            >
+              Cancel
+            </button>
+            <button
+              class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+              @click="handleReset"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

@@ -30,6 +30,7 @@ export interface ComponentConfig {
   enabled: boolean
   replicas: number
   resources: Resources
+  configData: string
 }
 
 export interface DatanodeStorage {
@@ -275,6 +276,7 @@ export interface AppConfig {
     replicas: number
     resources: Resources
     backendStorage: MetaBackendStorage
+    configData: string
   }
   datanode: DatanodeConfig
   flownode: ComponentConfig

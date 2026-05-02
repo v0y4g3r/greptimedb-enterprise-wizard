@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, watch } from 'vue'
 import { config } from '../../store/config'
+import { useTomlValidation } from '../../composables/useTomlValidation'
 import FormField from '../ui/FormField.vue'
 import ToggleSwitch from '../ui/ToggleSwitch.vue'
 
@@ -18,7 +19,15 @@ const metaValid = computed(() => isResourcesFilled(config.meta.resources))
 const datanodeValid = computed(() => !config.datanode.enabled || isResourcesFilled(config.datanode.resources))
 const flownodeValid = computed(() => !config.flownode.enabled || isResourcesFilled(config.flownode.resources))
 
-const allValid = computed(() => frontendValid.value && metaValid.value && datanodeValid.value && flownodeValid.value)
+const frontendToml = useTomlValidation(() => config.frontend.configData)
+const metaToml = useTomlValidation(() => config.meta.configData)
+const datanodeToml = useTomlValidation(() => config.datanode.configData)
+const flownodeToml = useTomlValidation(() => config.flownode.configData)
+
+const allValid = computed(() =>
+  frontendValid.value && metaValid.value && datanodeValid.value && flownodeValid.value &&
+  frontendToml.value.valid && metaToml.value.valid && datanodeToml.value.valid && flownodeToml.value.valid
+)
 
 const setStepValid = inject<(step: number, valid: boolean) => void>('setStepValid')!
 watch(allValid, (valid) => setStepValid(2, valid), { immediate: true })
@@ -36,7 +45,13 @@ function resourceInputClass(filled: boolean): string {
       Meta is always deployed. Toggle other components and <strong class="text-gt-purple">explicitly set resource requests and limits</strong> for each enabled component.
     </p>
     <div v-if="!allValid" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-      All enabled components must have resource requests and limits set before proceeding.
+      <template v-if="!(frontendValid && metaValid && datanodeValid && flownodeValid)">
+        All enabled components must have resource requests and limits set before proceeding.
+      </template>
+      <template v-if="!frontendToml.valid || !metaToml.valid || !datanodeToml.valid || !flownodeToml.valid">
+        <span v-if="!(frontendValid && metaValid && datanodeValid && flownodeValid)"><br /></span>
+        Fix TOML syntax errors in the highlighted config fields before proceeding.
+      </template>
     </div>
 
     <!-- Frontend -->
@@ -75,6 +90,23 @@ function resourceInputClass(filled: boolean): string {
               <input v-model="config.frontend.resources.limits.memory" type="text" :class="resourceInputClass(!!config.frontend.resources.limits.memory)" placeholder="e.g. 16Gi" />
             </FormField>
           </div>
+        </div>
+        <div class="border-t border-gt-border pt-4">
+          <FormField label="Extra TOML Config" description="Optional raw TOML configuration appended to the frontend config">
+            <textarea
+              v-model="config.frontend.configData"
+              :class="[
+                'mt-1 block w-full rounded-md shadow-sm focus:ring-gt-accent sm:text-sm border p-2 font-mono text-xs',
+                frontendToml.valid ? 'border-gt-border focus:border-gt-accent' : 'border-red-300 focus:border-red-500'
+              ]"
+              rows="4"
+              placeholder="# [http]
+# addr = &quot;0.0.0.0:4000&quot;"
+            />
+            <p v-if="!frontendToml.valid" class="mt-1.5 text-xs text-red-600">
+              TOML syntax error<span v-if="frontendToml.line"> at line {{ frontendToml.line }}<span v-if="frontendToml.column">, col {{ frontendToml.column }}</span></span>: {{ frontendToml.error }}
+            </p>
+          </FormField>
         </div>
       </div>
     </div>
@@ -117,6 +149,23 @@ function resourceInputClass(filled: boolean): string {
               <input v-model="config.meta.resources.limits.memory" type="text" :class="resourceInputClass(!!config.meta.resources.limits.memory)" placeholder="e.g. 4Gi" />
             </FormField>
           </div>
+        </div>
+        <div class="border-t border-gt-border pt-4">
+          <FormField label="Extra TOML Config" description="Optional raw TOML configuration appended to the meta config">
+            <textarea
+              v-model="config.meta.configData"
+              :class="[
+                'mt-1 block w-full rounded-md shadow-sm focus:ring-gt-accent sm:text-sm border p-2 font-mono text-xs',
+                metaToml.valid ? 'border-gt-border focus:border-gt-accent' : 'border-red-300 focus:border-red-500'
+              ]"
+              rows="4"
+              placeholder="# [meta]
+# store_key_prefix = &quot;&quot;"
+            />
+            <p v-if="!metaToml.valid" class="mt-1.5 text-xs text-red-600">
+              TOML syntax error<span v-if="metaToml.line"> at line {{ metaToml.line }}<span v-if="metaToml.column">, col {{ metaToml.column }}</span></span>: {{ metaToml.error }}
+            </p>
+          </FormField>
         </div>
       </div>
     </div>
@@ -189,6 +238,23 @@ function resourceInputClass(filled: boolean): string {
             </FormField>
           </div>
         </div>
+        <div class="border-t border-gt-border pt-4">
+          <FormField label="Extra TOML Config" description="Optional raw TOML configuration appended to the datanode config">
+            <textarea
+              v-model="config.datanode.configData"
+              :class="[
+                'mt-1 block w-full rounded-md shadow-sm focus:ring-gt-accent sm:text-sm border p-2 font-mono text-xs',
+                datanodeToml.valid ? 'border-gt-border focus:border-gt-accent' : 'border-red-300 focus:border-red-500'
+              ]"
+              rows="4"
+              placeholder="# [storage]
+# cache_capacity = &quot;10Gi&quot;"
+            />
+            <p v-if="!datanodeToml.valid" class="mt-1.5 text-xs text-red-600">
+              TOML syntax error<span v-if="datanodeToml.line"> at line {{ datanodeToml.line }}<span v-if="datanodeToml.column">, col {{ datanodeToml.column }}</span></span>: {{ datanodeToml.error }}
+            </p>
+          </FormField>
+        </div>
       </div>
     </div>
 
@@ -228,6 +294,21 @@ function resourceInputClass(filled: boolean): string {
               <input v-model="config.flownode.resources.limits.memory" type="text" :class="resourceInputClass(!!config.flownode.resources.limits.memory)" placeholder="e.g. 4Gi" />
             </FormField>
           </div>
+        </div>
+        <div class="border-t border-gt-border pt-4">
+          <FormField label="Extra TOML Config" description="Optional raw TOML configuration appended to the flownode config">
+            <textarea
+              v-model="config.flownode.configData"
+              :class="[
+                'mt-1 block w-full rounded-md shadow-sm focus:ring-gt-accent sm:text-sm border p-2 font-mono text-xs',
+                flownodeToml.valid ? 'border-gt-border focus:border-gt-accent' : 'border-red-300 focus:border-red-500'
+              ]"
+              rows="4"
+            />
+            <p v-if="!flownodeToml.valid" class="mt-1.5 text-xs text-red-600">
+              TOML syntax error<span v-if="flownodeToml.line"> at line {{ flownodeToml.line }}<span v-if="flownodeToml.column">, col {{ flownodeToml.column }}</span></span>: {{ flownodeToml.error }}
+            </p>
+          </FormField>
         </div>
       </div>
     </div>

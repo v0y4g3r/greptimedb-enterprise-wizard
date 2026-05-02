@@ -57,9 +57,12 @@ export function generateValuesYaml(config: AppConfig): string {
     const lines: string[] = []
     lines.push(yamlKey('enabled', true))
     lines.push(yamlKey('replicas', config.frontend.replicas))
-    if (config.frontend.resources.requests.cpu !== '500m' || config.frontend.resources.requests.memory !== '512Mi' ||
-        config.frontend.resources.limits.cpu !== '2' || config.frontend.resources.limits.memory !== '4Gi') {
+    if (config.frontend.resources.requests.cpu || config.frontend.resources.requests.memory ||
+        config.frontend.resources.limits.cpu || config.frontend.resources.limits.memory) {
       lines.push(`podTemplate:\n  main:\n    resources:\n      requests:\n        cpu: ${config.frontend.resources.requests.cpu}\n        memory: ${config.frontend.resources.requests.memory}\n      limits:\n        cpu: ${config.frontend.resources.limits.cpu}\n        memory: ${config.frontend.resources.limits.memory}`)
+    }
+    if (config.frontend.configData.trim()) {
+      lines.push(`configData: |\n${indent(config.frontend.configData, 1)}`)
     }
     sections.push(`frontend:\n${indent(lines.join('\n'), 1)}`)
   } else {
@@ -129,6 +132,10 @@ export function generateValuesYaml(config: AppConfig): string {
       lines.push(yamlKey('enableRegionFailover', true))
     }
 
+    if (config.meta.configData.trim()) {
+      lines.push(`configData: |\n${indent(config.meta.configData, 1)}`)
+    }
+
     sections.push(`meta:\n${indent(lines.join('\n'), 1)}`)
   }
 
@@ -148,6 +155,9 @@ export function generateValuesYaml(config: AppConfig): string {
     storageLines.push(yamlKey('storageSize', config.datanode.storage.storageSize))
     storageLines.push(yamlKey('storageRetainPolicy', config.datanode.storage.storageRetainPolicy))
     lines.push(`storage:\n${indent(storageLines.join('\n'), 1)}`)
+    if (config.datanode.configData.trim()) {
+      lines.push(`configData: |\n${indent(config.datanode.configData, 1)}`)
+    }
     sections.push(`datanode:\n${indent(lines.join('\n'), 1)}`)
   } else {
     sections.push(`datanode:\n  enabled: false`)
@@ -158,9 +168,12 @@ export function generateValuesYaml(config: AppConfig): string {
     const lines: string[] = []
     lines.push(yamlKey('enabled', true))
     lines.push(yamlKey('replicas', config.flownode.replicas))
-    if (config.flownode.resources.requests.cpu !== '500m' || config.flownode.resources.requests.memory !== '512Mi' ||
-        config.flownode.resources.limits.cpu !== '2' || config.flownode.resources.limits.memory !== '4Gi') {
+    if (config.flownode.resources.requests.cpu || config.flownode.resources.requests.memory ||
+        config.flownode.resources.limits.cpu || config.flownode.resources.limits.memory) {
       lines.push(`podTemplate:\n  main:\n    resources:\n      requests:\n        cpu: ${config.flownode.resources.requests.cpu}\n        memory: ${config.flownode.resources.requests.memory}\n      limits:\n        cpu: ${config.flownode.resources.limits.cpu}\n        memory: ${config.flownode.resources.limits.memory}`)
+    }
+    if (config.flownode.configData.trim()) {
+      lines.push(`configData: |\n${indent(config.flownode.configData, 1)}`)
     }
     sections.push(`flownode:\n${indent(lines.join('\n'), 1)}`)
   } else {
