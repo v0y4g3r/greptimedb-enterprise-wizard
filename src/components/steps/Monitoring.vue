@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import { computed, inject, watch } from 'vue'
 import { config } from '../../store/config'
+import { isMonitoringValid } from '../../validation/configValidation'
 import FormField from '../ui/FormField.vue'
 import RadioGroup from '../ui/RadioGroup.vue'
 import ToggleSwitch from '../ui/ToggleSwitch.vue'
+
+const stepValid = computed(() => isMonitoringValid(config.monitoringObservability))
+const setStepValid = inject<(step: number, valid: boolean) => void>('setStepValid')!
+watch(stepValid, (valid) => setStepValid(7, valid), { immediate: true })
 </script>
 
 <template>
   <div class="space-y-6">
+    <div v-if="!stepValid" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+      Complete required monitoring storage or tracing fields before proceeding.
+    </div>
+
     <!-- Monitoring Standalone -->
     <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
@@ -57,13 +67,13 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
                 <input v-model="config.monitoringObservability.monitoring.objectStorage.s3.bucket" type="text"
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" placeholder="monitoring" />
               </FormField>
-              <FormField label="Region">
+              <FormField label="Region" required>
                 <input v-model="config.monitoringObservability.monitoring.objectStorage.s3.region" type="text"
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" placeholder="us-west-2" />
               </FormField>
             </div>
             <div class="grid grid-cols-2 gap-4">
-              <FormField label="Root Path" description="Optional prefix within the bucket">
+              <FormField label="Root Path" required description="Prefix within the bucket">
                 <input v-model="config.monitoringObservability.monitoring.objectStorage.s3.root" type="text"
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" />
               </FormField>
@@ -89,7 +99,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
               </FormField>
             </div>
             <div class="grid grid-cols-2 gap-4">
-              <FormField label="Root Path">
+              <FormField label="Root Path" required>
                 <input v-model="config.monitoringObservability.monitoring.objectStorage.gcs.root" type="text"
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" />
               </FormField>
@@ -112,7 +122,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" />
               </FormField>
             </div>
-            <FormField label="Root Path">
+            <FormField label="Root Path" required>
               <input v-model="config.monitoringObservability.monitoring.objectStorage.azblob.root" type="text"
                 class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" />
             </FormField>
@@ -125,13 +135,13 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
                 <input v-model="config.monitoringObservability.monitoring.objectStorage.oss.bucket" type="text"
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" />
               </FormField>
-              <FormField label="Region">
+              <FormField label="Region" required>
                 <input v-model="config.monitoringObservability.monitoring.objectStorage.oss.region" type="text"
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" />
               </FormField>
             </div>
             <div class="grid grid-cols-2 gap-4">
-              <FormField label="Root Path">
+              <FormField label="Root Path" required>
                 <input v-model="config.monitoringObservability.monitoring.objectStorage.oss.root" type="text"
                   class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2" />
               </FormField>
@@ -144,7 +154,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
 
           <!-- Secret Name (for all cloud providers) -->
           <div v-if="config.monitoringObservability.monitoring.objectStorage.type !== 'none'" class="mt-4">
-            <FormField label="Secret Name" description="Kubernetes secret containing storage credentials">
+            <FormField label="Secret Name" required description="Kubernetes secret containing storage credentials">
               <input v-model="config.monitoringObservability.monitoring.objectStorage.secretName" type="text"
                 class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
                 placeholder="monitoring-storage-credentials" />

@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { computed, inject, watch } from 'vue'
 import { config } from '../../store/config'
+import { isMetaBackendValid } from '../../validation/configValidation'
 import FormField from '../ui/FormField.vue'
 import RadioGroup from '../ui/RadioGroup.vue'
+
+const stepValid = computed(() => isMetaBackendValid(config.meta.backendStorage))
+const setStepValid = inject<(step: number, valid: boolean) => void>('setStepValid')!
+watch(stepValid, (valid) => setStepValid(3, valid), { immediate: true })
 
 function addEndpoint() {
   config.meta.backendStorage.etcd.endpoints.push('')
@@ -14,6 +20,10 @@ function removeEndpoint(index: number) {
 
 <template>
   <div class="space-y-6">
+    <div v-if="!stepValid" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+      Complete the required fields for the selected metadata backend before proceeding.
+    </div>
+
     <RadioGroup
       v-model="config.meta.backendStorage.type"
       label="Metadata Backend Storage"

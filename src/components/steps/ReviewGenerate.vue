@@ -26,7 +26,8 @@ function downloadYaml() {
 
 const summary = computed(() => {
   const items: { label: string; value: string }[] = []
-  items.push({ label: 'Cluster Name', value: config.clusterName })
+  items.push({ label: 'Helm Release Name', value: config.clusterName })
+  items.push({ label: 'Helm Namespace', value: config.clusterNamespace })
   items.push({ label: 'Image', value: `${config.image.repository}:${config.image.tag}` })
   items.push({ label: 'Frontend', value: config.frontend.enabled ? `${config.frontend.replicas} replica(s)` : 'Disabled' })
   items.push({ label: 'Meta', value: `${config.meta.replicas} replica(s)` })

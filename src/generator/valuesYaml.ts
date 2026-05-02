@@ -1,4 +1,4 @@
-import type { AppConfig } from '../types/config'
+import type { AppConfig, ObjectStorageConfig } from '../types/config'
 
 function indent(str: string, level: number): string {
   const prefix = '  '.repeat(level)
@@ -10,18 +10,95 @@ function yamlKey(key: string, value: string | number | boolean): string {
     if (value.includes('\n')) {
       return `${key}: |\n${indent(value, 1)}`
     }
-    if (value === '' || value.includes(':') || value.includes('#') || value.includes('{') || value.includes('[')) {
-      return `${key}: "${value}"`
-    }
-    return `${key}: ${value}`
+    return `${key}: ${JSON.stringify(value)}`
   }
   return `${key}: ${value}`
 }
 
+function yamlString(value: string): string {
+  return JSON.stringify(value)
+}
+
 function yamlArray(key: string, items: string[]): string {
   if (items.length === 0) return ''
-  const lines = items.map(item => `  - "${item}"`)
+  const lines = items.map(item => `  - ${yamlString(item)}`)
   return `${key}:\n${lines.join('\n')}`
+}
+
+function objectStorageCredentialLines(storage: ObjectStorageConfig, includeExistingSecret = true): string[] {
+  const lines: string[] = []
+
+  if (includeExistingSecret && storage.credentials.existingSecretName) {
+    lines.push(yamlKey('existingSecretName', storage.credentials.existingSecretName))
+  } else if (storage.type === 'azblob') {
+    if (storage.credentials.accessKeyId) lines.push(yamlKey('accountName', storage.credentials.accessKeyId))
+    if (storage.credentials.secretAccessKey) lines.push(yamlKey('accountKey', storage.credentials.secretAccessKey))
+  } else if (storage.type === 'oss') {
+    if (storage.credentials.accessKeyId) lines.push(yamlKey('accessKeyId', storage.credentials.accessKeyId))
+    if (storage.credentials.secretAccessKey) lines.push(yamlKey('accessKeySecret', storage.credentials.secretAccessKey))
+  } else if (storage.type === 'gcs') {
+    if (storage.credentials.secretAccessKey || storage.credentials.accessKeyId) {
+      lines.push(yamlKey('serviceAccountKey', storage.credentials.secretAccessKey || storage.credentials.accessKeyId))
+    }
+  } else {
+    if (storage.credentials.accessKeyId) lines.push(yamlKey('accessKeyId', storage.credentials.accessKeyId))
+    if (storage.credentials.secretAccessKey) lines.push(yamlKey('secretAccessKey', storage.credentials.secretAccessKey))
+  }
+
+  return lines
+}
+
+function objectStorageLines(storage: ObjectStorageConfig, includeCache: boolean, includeExistingSecret = true): string[] {
+  const lines: string[] = []
+  const credLines = objectStorageCredentialLines(storage, includeExistingSecret)
+
+  if (credLines.length > 0) {
+    lines.push(`credentials:\n${indent(credLines.join('\n'), 1)}`)
+  }
+
+  if (storage.type === 's3') {
+    const s3Lines: string[] = []
+    s3Lines.push(yamlKey('bucket', storage.s3.bucket))
+    s3Lines.push(yamlKey('region', storage.s3.region))
+    s3Lines.push(yamlKey('root', storage.s3.root))
+    if (storage.s3.endpoint) s3Lines.push(yamlKey('endpoint', storage.s3.endpoint))
+    if (storage.s3.enableVirtualHostStyle) s3Lines.push(yamlKey('enableVirtualHostStyle', true))
+    lines.push(`s3:\n${indent(s3Lines.join('\n'), 1)}`)
+  } else if (storage.type === 'gcs') {
+    const gcsLines: string[] = []
+    gcsLines.push(yamlKey('bucket', storage.gcs.bucket))
+    if (storage.gcs.scope) gcsLines.push(yamlKey('scope', storage.gcs.scope))
+    gcsLines.push(yamlKey('root', storage.gcs.root))
+    if (storage.gcs.endpoint) gcsLines.push(yamlKey('endpoint', storage.gcs.endpoint))
+    lines.push(`gcs:\n${indent(gcsLines.join('\n'), 1)}`)
+  } else if (storage.type === 'azblob') {
+    const azLines: string[] = []
+    azLines.push(yamlKey('container', storage.azblob.container))
+    if (storage.azblob.endpoint) azLines.push(yamlKey('endpoint', storage.azblob.endpoint))
+    azLines.push(yamlKey('root', storage.azblob.root))
+    lines.push(`azblob:\n${indent(azLines.join('\n'), 1)}`)
+  } else if (storage.type === 'oss') {
+    const ossLines: string[] = []
+    ossLines.push(yamlKey('bucket', storage.oss.bucket))
+    ossLines.push(yamlKey('region', storage.oss.region))
+    ossLines.push(yamlKey('root', storage.oss.root))
+    if (storage.oss.endpoint) ossLines.push(yamlKey('endpoint', storage.oss.endpoint))
+    lines.push(`oss:\n${indent(ossLines.join('\n'), 1)}`)
+  }
+
+  if (includeCache && storage.cache.enabled) {
+    const cacheLines: string[] = []
+    cacheLines.push(yamlKey('cacheCapacity', storage.cache.cacheCapacity))
+    const fsLines: string[] = []
+    if (storage.cache.storageClassName) fsLines.push(yamlKey('storageClassName', storage.cache.storageClassName))
+    fsLines.push(yamlKey('name', 'cache'))
+    fsLines.push(yamlKey('storageSize', storage.cache.storageSize))
+    fsLines.push(yamlKey('mountPath', '/cache'))
+    cacheLines.push(`fs:\n${indent(fsLines.join('\n'), 1)}`)
+    lines.push(`cache:\n${indent(cacheLines.join('\n'), 1)}`)
+  }
+
+  return lines
 }
 
 export function generateValuesYaml(config: AppConfig): string {
@@ -84,7 +161,7 @@ export function generateValuesYaml(config: AppConfig): string {
       if (config.meta.backendStorage.etcd.endpoints.length > 0) {
         etcdLines.push('endpoints:')
         config.meta.backendStorage.etcd.endpoints.forEach(ep => {
-          etcdLines.push(`  - "${ep}"`)
+          etcdLines.push(`  - ${yamlString(ep)}`)
         })
       }
       if (config.meta.backendStorage.etcd.storeKeyPrefix) {
@@ -103,6 +180,7 @@ export function generateValuesYaml(config: AppConfig): string {
       if (config.meta.backendStorage.mysql.credentials.existingSecretName) {
         credLines.push(yamlKey('existingSecretName', config.meta.backendStorage.mysql.credentials.existingSecretName))
       } else {
+        credLines.push(yamlKey('secretName', 'meta-mysql-credentials'))
         credLines.push(yamlKey('username', config.meta.backendStorage.mysql.credentials.username))
         credLines.push(yamlKey('password', config.meta.backendStorage.mysql.credentials.password))
       }
@@ -121,6 +199,7 @@ export function generateValuesYaml(config: AppConfig): string {
       if (config.meta.backendStorage.postgresql.credentials.existingSecretName) {
         credLines.push(yamlKey('existingSecretName', config.meta.backendStorage.postgresql.credentials.existingSecretName))
       } else {
+        credLines.push(yamlKey('secretName', 'meta-postgresql-credentials'))
         credLines.push(yamlKey('username', config.meta.backendStorage.postgresql.credentials.username))
         credLines.push(yamlKey('password', config.meta.backendStorage.postgresql.credentials.password))
       }
@@ -182,69 +261,7 @@ export function generateValuesYaml(config: AppConfig): string {
 
   // Object Storage
   if (config.objectStorage.type !== 'none') {
-    const lines: string[] = []
-    const credLines: string[] = []
-
-    if (config.objectStorage.credentials.existingSecretName) {
-      credLines.push(yamlKey('existingSecretName', config.objectStorage.credentials.existingSecretName))
-    } else {
-      if (config.objectStorage.credentials.accessKeyId) {
-        credLines.push(yamlKey('accessKeyId', config.objectStorage.credentials.accessKeyId))
-      }
-      if (config.objectStorage.credentials.secretAccessKey) {
-        credLines.push(yamlKey('secretAccessKey', config.objectStorage.credentials.secretAccessKey))
-      }
-    }
-
-    if (credLines.length > 0) {
-      lines.push(`credentials:\n${indent(credLines.join('\n'), 1)}`)
-    }
-
-    if (config.objectStorage.type === 's3') {
-      const s3Lines: string[] = []
-      s3Lines.push(yamlKey('bucket', config.objectStorage.s3.bucket))
-      if (config.objectStorage.s3.region) s3Lines.push(yamlKey('region', config.objectStorage.s3.region))
-      if (config.objectStorage.s3.root) s3Lines.push(yamlKey('root', config.objectStorage.s3.root))
-      if (config.objectStorage.s3.endpoint) s3Lines.push(yamlKey('endpoint', config.objectStorage.s3.endpoint))
-      if (config.objectStorage.s3.enableVirtualHostStyle) s3Lines.push(yamlKey('enableVirtualHostStyle', true))
-      lines.push(`s3:\n${indent(s3Lines.join('\n'), 1)}`)
-    } else if (config.objectStorage.type === 'gcs') {
-      const gcsLines: string[] = []
-      gcsLines.push(yamlKey('bucket', config.objectStorage.gcs.bucket))
-      if (config.objectStorage.gcs.scope) gcsLines.push(yamlKey('scope', config.objectStorage.gcs.scope))
-      if (config.objectStorage.gcs.root) gcsLines.push(yamlKey('root', config.objectStorage.gcs.root))
-      if (config.objectStorage.gcs.endpoint) gcsLines.push(yamlKey('endpoint', config.objectStorage.gcs.endpoint))
-      lines.push(`gcs:\n${indent(gcsLines.join('\n'), 1)}`)
-    } else if (config.objectStorage.type === 'azblob') {
-      const azLines: string[] = []
-      azLines.push(yamlKey('container', config.objectStorage.azblob.container))
-      if (config.objectStorage.azblob.endpoint) azLines.push(yamlKey('endpoint', config.objectStorage.azblob.endpoint))
-      if (config.objectStorage.azblob.root) azLines.push(yamlKey('root', config.objectStorage.azblob.root))
-      lines.push(`azblob:\n${indent(azLines.join('\n'), 1)}`)
-    } else if (config.objectStorage.type === 'oss') {
-      const ossLines: string[] = []
-      ossLines.push(yamlKey('bucket', config.objectStorage.oss.bucket))
-      if (config.objectStorage.oss.region) ossLines.push(yamlKey('region', config.objectStorage.oss.region))
-      if (config.objectStorage.oss.root) ossLines.push(yamlKey('root', config.objectStorage.oss.root))
-      if (config.objectStorage.oss.endpoint) ossLines.push(yamlKey('endpoint', config.objectStorage.oss.endpoint))
-      lines.push(`oss:\n${indent(ossLines.join('\n'), 1)}`)
-    }
-
-    // Cache
-    if (config.objectStorage.cache.enabled) {
-      const cacheLines: string[] = []
-      cacheLines.push(yamlKey('cacheCapacity', config.objectStorage.cache.cacheCapacity))
-      if (config.objectStorage.cache.storageClassName || config.objectStorage.cache.storageSize) {
-        const fsLines: string[] = []
-        if (config.objectStorage.cache.storageClassName) {
-          fsLines.push(yamlKey('storageClassName', config.objectStorage.cache.storageClassName))
-        }
-        fsLines.push(yamlKey('storageSize', config.objectStorage.cache.storageSize))
-        cacheLines.push(`fs:\n${indent(fsLines.join('\n'), 1)}`)
-      }
-      lines.push(`cache:\n${indent(cacheLines.join('\n'), 1)}`)
-    }
-
+    const lines = objectStorageLines(config.objectStorage, true)
     sections.push(`objectStorage:\n${indent(lines.join('\n'), 1)}`)
   }
 
@@ -253,7 +270,7 @@ export function generateValuesYaml(config: AppConfig): string {
     const lines: string[] = []
     lines.push(yamlKey('enabled', true))
     if (config.wal.remote.kafkaBrokerEndpoints.length > 0) {
-      lines.push(`kafka:\n  brokerEndpoints:\n${config.wal.remote.kafkaBrokerEndpoints.map(ep => `    - "${ep}"`).join('\n')}`)
+      lines.push(`kafka:\n  brokerEndpoints:\n${config.wal.remote.kafkaBrokerEndpoints.map(ep => `    - ${yamlString(ep)}`).join('\n')}`)
     }
     sections.push(`remoteWal:\n${indent(lines.join('\n'), 1)}`)
   }
@@ -288,9 +305,9 @@ export function generateValuesYaml(config: AppConfig): string {
     if (config.enterprise.auth.users.length > 0) {
       lines.push('users:')
       config.enterprise.auth.users.forEach(u => {
-        lines.push(`  - username: "${u.username}"`)
-        lines.push(`    password: "${u.password}"`)
-        lines.push(`    permission: "${u.permission}"`)
+        lines.push(`  - username: ${yamlString(u.username)}`)
+        lines.push(`    password: ${yamlString(u.password)}`)
+        lines.push(`    permission: ${yamlString(u.permission)}`)
       })
     }
     sections.push(`auth:\n${indent(lines.join('\n'), 1)}`)
@@ -300,6 +317,15 @@ export function generateValuesYaml(config: AppConfig): string {
   if (config.enterprise.remoteCompaction.enabled) {
     const lines: string[] = []
     lines.push(yamlKey('enabled', true))
+    lines.push(`scheduler:\n  image:\n    registry: ${yamlString(config.enterprise.remoteCompaction.scheduler.image.registry)}\n    repository: ${yamlString(config.enterprise.remoteCompaction.scheduler.image.repository)}\n    tag: ${yamlString(config.enterprise.remoteCompaction.scheduler.image.tag)}\n  replicas: ${config.enterprise.remoteCompaction.scheduler.replicas}`)
+    const compactorLines = [
+      `image:\n  registry: ${yamlString(config.enterprise.remoteCompaction.compactor.image.registry)}\n  repository: ${yamlString(config.enterprise.remoteCompaction.compactor.image.repository)}\n  tag: ${yamlString(config.enterprise.remoteCompaction.compactor.image.tag)}`,
+      yamlKey('replicas', config.enterprise.remoteCompaction.compactor.replicas),
+    ]
+    if (config.objectStorage.type !== 'none') {
+      compactorLines.push(`objectStorage:\n${indent(objectStorageLines(config.objectStorage, false, false).join('\n'), 1)}`)
+    }
+    lines.push(`compactor:\n${indent(compactorLines.join('\n'), 1)}`)
     sections.push(`greptimedb-remote-compaction:\n${indent(lines.join('\n'), 1)}`)
   }
 
@@ -307,6 +333,12 @@ export function generateValuesYaml(config: AppConfig): string {
   if (config.enterprise.dashboard.enabled) {
     const lines: string[] = []
     lines.push(yamlKey('enabled', true))
+    lines.push(yamlKey('replicaCount', config.enterprise.dashboard.replicas))
+    const dashboardRepository = config.enterprise.dashboard.image.registry
+      ? `${config.enterprise.dashboard.image.registry}/${config.enterprise.dashboard.image.repository}`
+      : config.enterprise.dashboard.image.repository
+    lines.push(`image:\n  repository: ${yamlString(dashboardRepository)}\n  tag: ${yamlString(config.enterprise.dashboard.image.tag)}`)
+    lines.push(`config: |\n${indent(`servicePort: 19095\nlogLevel: info\nprovisionedInstances:\n- name: ${config.clusterName}\n  namespace: ${config.clusterNamespace}\n  type: cluster\n  url: http://${config.clusterName}-frontend.${config.clusterNamespace}.svc.cluster.local:4000\n  monitoring:\n    greptimedb:\n      url: http://${config.clusterName}-monitor-standalone.${config.clusterNamespace}.svc.cluster.local:4000`, 1)}`)
     sections.push(`greptimedb-enterprise-dashboard:\n${indent(lines.join('\n'), 1)}`)
   }
 
@@ -319,29 +351,33 @@ export function generateValuesYaml(config: AppConfig): string {
     const standaloneLines: string[] = []
     const mon = config.monitoringObservability.monitoring
 
+    if (mon.resources.cpu || mon.resources.memory) {
+      standaloneLines.push(`base:\n  main:\n    resources:\n      requests:\n        cpu: ${yamlString(mon.resources.cpu)}\n        memory: ${yamlString(mon.resources.memory)}\n      limits:\n        cpu: ${yamlString(mon.resources.cpu)}\n        memory: ${yamlString(mon.resources.memory)}`)
+    }
+
     // Object storage
     if (mon.objectStorage.type !== 'none') {
       const osLines: string[] = []
       const providerLines: string[] = []
       if (mon.objectStorage.type === 's3') {
         providerLines.push(yamlKey('bucket', mon.objectStorage.s3.bucket))
-        if (mon.objectStorage.s3.region) providerLines.push(yamlKey('region', mon.objectStorage.s3.region))
-        if (mon.objectStorage.s3.root) providerLines.push(yamlKey('root', mon.objectStorage.s3.root))
+        providerLines.push(yamlKey('region', mon.objectStorage.s3.region))
+        providerLines.push(yamlKey('root', mon.objectStorage.s3.root))
         if (mon.objectStorage.s3.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.s3.endpoint))
         if (mon.objectStorage.s3.enableVirtualHostStyle) providerLines.push(yamlKey('enableVirtualHostStyle', true))
       } else if (mon.objectStorage.type === 'gcs') {
         providerLines.push(yamlKey('bucket', mon.objectStorage.gcs.bucket))
         if (mon.objectStorage.gcs.scope) providerLines.push(yamlKey('scope', mon.objectStorage.gcs.scope))
-        if (mon.objectStorage.gcs.root) providerLines.push(yamlKey('root', mon.objectStorage.gcs.root))
+        providerLines.push(yamlKey('root', mon.objectStorage.gcs.root))
         if (mon.objectStorage.gcs.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.gcs.endpoint))
       } else if (mon.objectStorage.type === 'azblob') {
         providerLines.push(yamlKey('container', mon.objectStorage.azblob.container))
         if (mon.objectStorage.azblob.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.azblob.endpoint))
-        if (mon.objectStorage.azblob.root) providerLines.push(yamlKey('root', mon.objectStorage.azblob.root))
+        providerLines.push(yamlKey('root', mon.objectStorage.azblob.root))
       } else if (mon.objectStorage.type === 'oss') {
         providerLines.push(yamlKey('bucket', mon.objectStorage.oss.bucket))
-        if (mon.objectStorage.oss.region) providerLines.push(yamlKey('region', mon.objectStorage.oss.region))
-        if (mon.objectStorage.oss.root) providerLines.push(yamlKey('root', mon.objectStorage.oss.root))
+        providerLines.push(yamlKey('region', mon.objectStorage.oss.region))
+        providerLines.push(yamlKey('root', mon.objectStorage.oss.root))
         if (mon.objectStorage.oss.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.oss.endpoint))
       }
       if (mon.objectStorage.secretName) {
@@ -355,14 +391,14 @@ export function generateValuesYaml(config: AppConfig): string {
       if (mon.objectStorage.cache.enabled) {
         const cacheLines: string[] = []
         cacheLines.push(yamlKey('cacheCapacity', mon.objectStorage.cache.cacheCapacity))
-        if (mon.objectStorage.cache.storageClassName || mon.objectStorage.cache.storageSize) {
-          const fsLines: string[] = []
-          if (mon.objectStorage.cache.storageClassName) {
-            fsLines.push(yamlKey('storageClassName', mon.objectStorage.cache.storageClassName))
-          }
-          fsLines.push(yamlKey('storageSize', mon.objectStorage.cache.storageSize))
-          cacheLines.push(`fs:\n${indent(fsLines.join('\n'), 1)}`)
+        const fsLines: string[] = []
+        if (mon.objectStorage.cache.storageClassName) {
+          fsLines.push(yamlKey('storageClassName', mon.objectStorage.cache.storageClassName))
         }
+        fsLines.push(yamlKey('name', 'cache'))
+        fsLines.push(yamlKey('storageSize', mon.objectStorage.cache.storageSize))
+        fsLines.push(yamlKey('mountPath', '/cache'))
+        cacheLines.push(`fs:\n${indent(fsLines.join('\n'), 1)}`)
         osLines.push(`cache:\n${indent(cacheLines.join('\n'), 1)}`)
       }
 
@@ -453,12 +489,17 @@ export function generateValuesYaml(config: AppConfig): string {
     if (config.ingress.rules.length > 0) {
       lines.push('rules:')
       config.ingress.rules.forEach(rule => {
-        lines.push(`  - host: "${rule.host}"`)
-        if (rule.path) lines.push(`    path: "${rule.path}"`)
+        lines.push(`  - host: ${yamlString(rule.host)}`)
+        if (rule.path) lines.push(`    path: ${yamlString(rule.path)}`)
       })
     }
     sections.push(`ingress:\n${indent(lines.join('\n'), 1)}`)
   }
 
-  return sections.join('\n\n') + '\n'
+  const releaseName = config.clusterName.replace(/[\r\n]/g, ' ').trim()
+  const header = releaseName
+    ? `# Use this values file with Helm release name: ${releaseName}\n# Example: helm install ${releaseName} greptime/greptimedb-cluster -f values.yaml\n\n`
+    : ''
+
+  return header + sections.join('\n\n') + '\n'
 }

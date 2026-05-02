@@ -5,6 +5,7 @@ const STORAGE_KEY = 'greptimedb-configurator'
 
 const defaults: AppConfig = {
   clusterName: 'greptimedb',
+  clusterNamespace: 'default',
   image: {
     registry: '',
     repository: 'greptime/greptimedb',

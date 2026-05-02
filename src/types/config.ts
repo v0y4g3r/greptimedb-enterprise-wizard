@@ -294,6 +294,7 @@ export interface IngressConfig {
 
 export interface AppConfig {
   clusterName: string
+  clusterNamespace: string
   image: ImageConfig
   customImageRegistry: CustomImageRegistry
   initializerImage: ImageConfig

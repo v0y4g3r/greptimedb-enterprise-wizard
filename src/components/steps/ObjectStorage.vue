@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import { computed, inject, watch } from 'vue'
 import { config } from '../../store/config'
+import { isObjectStorageValid } from '../../validation/configValidation'
 import FormField from '../ui/FormField.vue'
 import RadioGroup from '../ui/RadioGroup.vue'
 import ToggleSwitch from '../ui/ToggleSwitch.vue'
+
+const stepValid = computed(() => isObjectStorageValid(config.objectStorage))
+const setStepValid = inject<(step: number, valid: boolean) => void>('setStepValid')!
+watch(stepValid, (valid) => setStepValid(4, valid), { immediate: true })
 </script>
 
 <template>
   <div class="space-y-6">
+    <div v-if="!stepValid" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+      Complete the selected object storage provider and credentials before proceeding.
+    </div>
+
     <RadioGroup
       v-model="config.objectStorage.type"
       label="Object Storage Backend"
@@ -31,7 +41,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
             placeholder="my-greptimedb-bucket"
           />
         </FormField>
-        <FormField label="Region">
+        <FormField label="Region" required>
           <input
             v-model="config.objectStorage.s3.region"
             type="text"
@@ -41,7 +51,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
         </FormField>
       </div>
       <div class="grid grid-cols-2 gap-4">
-        <FormField label="Root Path" description="Optional prefix within the bucket">
+        <FormField label="Root Path" required description="Prefix within the bucket">
           <input
             v-model="config.objectStorage.s3.root"
             type="text"
@@ -84,7 +94,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
         </FormField>
       </div>
       <div class="grid grid-cols-2 gap-4">
-        <FormField label="Root Path">
+        <FormField label="Root Path" required>
           <input
             v-model="config.objectStorage.gcs.root"
             type="text"
@@ -120,7 +130,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
           />
         </FormField>
       </div>
-      <FormField label="Root Path">
+      <FormField label="Root Path" required>
         <input
           v-model="config.objectStorage.azblob.root"
           type="text"
@@ -140,7 +150,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
             placeholder="my-greptimedb-bucket"
           />
         </FormField>
-        <FormField label="Region">
+        <FormField label="Region" required>
           <input
             v-model="config.objectStorage.oss.region"
             type="text"
@@ -149,7 +159,7 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
         </FormField>
       </div>
       <div class="grid grid-cols-2 gap-4">
-        <FormField label="Root Path">
+        <FormField label="Root Path" required>
           <input
             v-model="config.objectStorage.oss.root"
             type="text"
@@ -176,15 +186,24 @@ import ToggleSwitch from '../ui/ToggleSwitch.vue'
           class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
         />
       </FormField>
-      <div v-if="!config.objectStorage.credentials.existingSecretName" class="grid grid-cols-2 gap-4">
-        <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Name' : 'Access Key ID'">
+      <div v-if="!config.objectStorage.credentials.existingSecretName && config.objectStorage.type === 'gcs'">
+        <FormField label="Service Account Key" required description="JSON-formatted base64 service account key">
+          <input
+            v-model="config.objectStorage.credentials.secretAccessKey"
+            type="password"
+            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
+          />
+        </FormField>
+      </div>
+      <div v-else-if="!config.objectStorage.credentials.existingSecretName" class="grid grid-cols-2 gap-4">
+        <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Name' : 'Access Key ID'" required>
           <input
             v-model="config.objectStorage.credentials.accessKeyId"
             type="text"
             class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
           />
         </FormField>
-        <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Key' : 'Secret Access Key'">
+        <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Key' : config.objectStorage.type === 'oss' ? 'Access Key Secret' : 'Secret Access Key'" required>
           <input
             v-model="config.objectStorage.credentials.secretAccessKey"
             type="password"

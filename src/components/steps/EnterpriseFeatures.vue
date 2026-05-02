@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { computed, inject, watch } from 'vue'
 import { config } from '../../store/config'
+import { isEnterpriseValid } from '../../validation/configValidation'
 import FormField from '../ui/FormField.vue'
 import ToggleSwitch from '../ui/ToggleSwitch.vue'
+
+const stepValid = computed(() => isEnterpriseValid(config.enterprise, config.objectStorage))
+const setStepValid = inject<(step: number, valid: boolean) => void>('setStepValid')!
+watch(stepValid, (valid) => setStepValid(6, valid), { immediate: true })
 
 function addUser() {
   config.enterprise.auth.users.push({
@@ -18,6 +24,10 @@ function removeUser(index: number) {
 
 <template>
   <div class="space-y-6">
+    <div v-if="!stepValid" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+      Complete authentication users. If Remote Compaction is enabled with object storage, use inline object storage credentials instead of an existing secret so the child chart can render its required secret.
+    </div>
+
     <!-- License -->
     <div class="border border-gt-border rounded-lg p-4">
       <ToggleSwitch
