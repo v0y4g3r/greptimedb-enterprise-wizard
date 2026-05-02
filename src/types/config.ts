@@ -207,9 +207,35 @@ export interface MonitoringStandaloneResources {
   memory: string
 }
 
+export interface MonitoringObjectStorageCache {
+  enabled: boolean
+  cacheCapacity: string
+  storageClassName: string
+  storageSize: string
+}
+
+export interface MonitoringObjectStorageConfig {
+  type: 'none' | 's3' | 'gcs' | 'azblob' | 'oss'
+  secretName: string
+  s3: S3Config
+  gcs: GcsConfig
+  azblob: AzblobConfig
+  oss: OssConfig
+  cache: MonitoringObjectStorageCache
+}
+
+export interface MonitoringDatanodeStorageConfig {
+  enabled: boolean
+  storageClassName: string
+  storageSize: string
+  storageRetainPolicy: string
+}
+
 export interface MonitoringConfig {
   enabled: boolean
   resources: MonitoringStandaloneResources
+  objectStorage: MonitoringObjectStorageConfig
+  datanodeStorage: MonitoringDatanodeStorageConfig
 }
 
 export interface GrafanaConfig {

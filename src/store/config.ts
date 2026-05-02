@@ -189,6 +189,21 @@ const defaults: AppConfig = {
         cpu: '500m',
         memory: '512Mi',
       },
+      objectStorage: {
+        type: 'none',
+        secretName: '',
+        s3: { bucket: '', region: '', root: '', endpoint: '', enableVirtualHostStyle: false },
+        gcs: { bucket: '', scope: '', root: '', endpoint: '' },
+        azblob: { container: '', endpoint: '', root: '' },
+        oss: { bucket: '', region: '', root: '', endpoint: '' },
+        cache: { enabled: false, cacheCapacity: '5Gi', storageClassName: '', storageSize: '10Gi' },
+      },
+      datanodeStorage: {
+        enabled: false,
+        storageClassName: '',
+        storageSize: '50Gi',
+        storageRetainPolicy: 'Retain',
+      },
     },
     grafana: {
       enabled: false,

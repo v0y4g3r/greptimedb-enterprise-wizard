@@ -314,6 +314,78 @@ export function generateValuesYaml(config: AppConfig): string {
   if (config.monitoringObservability.monitoring.enabled) {
     const lines: string[] = []
     lines.push(yamlKey('enabled', true))
+
+    // Standalone storage
+    const standaloneLines: string[] = []
+    const mon = config.monitoringObservability.monitoring
+
+    // Object storage
+    if (mon.objectStorage.type !== 'none') {
+      const osLines: string[] = []
+      const providerLines: string[] = []
+      if (mon.objectStorage.type === 's3') {
+        providerLines.push(yamlKey('bucket', mon.objectStorage.s3.bucket))
+        if (mon.objectStorage.s3.region) providerLines.push(yamlKey('region', mon.objectStorage.s3.region))
+        if (mon.objectStorage.s3.root) providerLines.push(yamlKey('root', mon.objectStorage.s3.root))
+        if (mon.objectStorage.s3.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.s3.endpoint))
+        if (mon.objectStorage.s3.enableVirtualHostStyle) providerLines.push(yamlKey('enableVirtualHostStyle', true))
+      } else if (mon.objectStorage.type === 'gcs') {
+        providerLines.push(yamlKey('bucket', mon.objectStorage.gcs.bucket))
+        if (mon.objectStorage.gcs.scope) providerLines.push(yamlKey('scope', mon.objectStorage.gcs.scope))
+        if (mon.objectStorage.gcs.root) providerLines.push(yamlKey('root', mon.objectStorage.gcs.root))
+        if (mon.objectStorage.gcs.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.gcs.endpoint))
+      } else if (mon.objectStorage.type === 'azblob') {
+        providerLines.push(yamlKey('container', mon.objectStorage.azblob.container))
+        if (mon.objectStorage.azblob.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.azblob.endpoint))
+        if (mon.objectStorage.azblob.root) providerLines.push(yamlKey('root', mon.objectStorage.azblob.root))
+      } else if (mon.objectStorage.type === 'oss') {
+        providerLines.push(yamlKey('bucket', mon.objectStorage.oss.bucket))
+        if (mon.objectStorage.oss.region) providerLines.push(yamlKey('region', mon.objectStorage.oss.region))
+        if (mon.objectStorage.oss.root) providerLines.push(yamlKey('root', mon.objectStorage.oss.root))
+        if (mon.objectStorage.oss.endpoint) providerLines.push(yamlKey('endpoint', mon.objectStorage.oss.endpoint))
+      }
+      if (mon.objectStorage.secretName) {
+        providerLines.push(yamlKey('secretName', mon.objectStorage.secretName))
+      }
+      if (providerLines.length > 0) {
+        osLines.push(`${mon.objectStorage.type}:\n${indent(providerLines.join('\n'), 1)}`)
+      }
+
+      // Cache
+      if (mon.objectStorage.cache.enabled) {
+        const cacheLines: string[] = []
+        cacheLines.push(yamlKey('cacheCapacity', mon.objectStorage.cache.cacheCapacity))
+        if (mon.objectStorage.cache.storageClassName || mon.objectStorage.cache.storageSize) {
+          const fsLines: string[] = []
+          if (mon.objectStorage.cache.storageClassName) {
+            fsLines.push(yamlKey('storageClassName', mon.objectStorage.cache.storageClassName))
+          }
+          fsLines.push(yamlKey('storageSize', mon.objectStorage.cache.storageSize))
+          cacheLines.push(`fs:\n${indent(fsLines.join('\n'), 1)}`)
+        }
+        osLines.push(`cache:\n${indent(cacheLines.join('\n'), 1)}`)
+      }
+
+      if (osLines.length > 0) {
+        standaloneLines.push(`objectStorage:\n${indent(osLines.join('\n'), 1)}`)
+      }
+    }
+
+    // Datanode storage
+    if (mon.datanodeStorage.enabled) {
+      const dsLines: string[] = []
+      if (mon.datanodeStorage.storageClassName) {
+        dsLines.push(yamlKey('storageClassName', mon.datanodeStorage.storageClassName))
+      }
+      dsLines.push(yamlKey('storageSize', mon.datanodeStorage.storageSize))
+      dsLines.push(yamlKey('storageRetainPolicy', mon.datanodeStorage.storageRetainPolicy))
+      standaloneLines.push(`datanodeStorage:\n  fs:\n${indent(dsLines.join('\n'), 2)}`)
+    }
+
+    if (standaloneLines.length > 0) {
+      lines.push(`standalone:\n${indent(standaloneLines.join('\n'), 1)}`)
+    }
+
     sections.push(`monitoring:\n${indent(lines.join('\n'), 1)}`)
   }
 
