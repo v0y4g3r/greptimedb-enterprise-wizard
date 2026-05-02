@@ -23,21 +23,21 @@ function inputClass(filled: boolean): string {
 
 <template>
   <div class="space-y-6">
-    <div class="grid grid-cols-2 gap-4">
-      <FormField label="Helm Release Name" description="Use this as the release name in helm install; Helm does not read release names from values.yaml.">
-        <input
-          v-model="config.clusterName"
-          type="text"
-          class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
-          placeholder="greptimedb"
-        />
-      </FormField>
+    <div class="space-y-4">
       <FormField label="Helm Namespace" description="Used for generated dashboard service URLs.">
         <input
           v-model="config.clusterNamespace"
           type="text"
           class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
           placeholder="default"
+        />
+      </FormField>
+      <FormField label="Helm Release Name" description="Use this as the release name in helm install; Helm does not read release names from values.yaml.">
+        <input
+          v-model="config.clusterName"
+          type="text"
+          class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
+          placeholder="greptimedb"
         />
       </FormField>
     </div>
