@@ -1,5 +1,7 @@
 # GreptimeDB Enterprise Values Configurator
 
+[![Build](https://github.com/v0y4g3r/enterprise-values-configurator/actions/workflows/build.yml/badge.svg)](https://github.com/v0y4g3r/enterprise-values-configurator/actions/workflows/build.yml)
+
 A web-based step-by-step wizard that guides you through configuring a GreptimeDB enterprise deployment and generates a `values.yaml` file for the [greptimedb-cluster](../greptime-helm-charts/charts/greptimedb-cluster) Helm chart.
 
 ## Quick Start
