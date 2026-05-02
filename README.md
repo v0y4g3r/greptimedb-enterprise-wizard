@@ -1,4 +1,4 @@
-# GreptimeDB Enterprise Values Configurator
+# GreptimeDB Enterprise Wizard
 
 [![Build](https://github.com/v0y4g3r/enterprise-values-configurator/actions/workflows/build.yml/badge.svg)](https://github.com/v0y4g3r/enterprise-values-configurator/actions/workflows/build.yml)
 
@@ -24,7 +24,7 @@ The production build is output to `dist/`.
 
 ## What It Does
 
-The configurator walks you through 8 steps to configure your GreptimeDB cluster:
+The wizard walks you through 8 steps to configure your GreptimeDB cluster:
 
 | Step | What You Configure |
 |---|---|

@@ -62,7 +62,7 @@ function handleReset() {
       <div class="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
         <img src="/logo.svg" alt="GreptimeDB" class="h-8" />
         <div class="flex-1">
-          <h1 class="text-xl font-bold text-gt-purple">Enterprise Values Configurator</h1>
+          <h1 class="text-xl font-bold text-gt-purple">GreptimeDB Enterprise Wizard</h1>
           <p class="text-sm text-gt-footer mt-0.5">Configure your Helm chart values.yaml step by step</p>
         </div>
         <button

@@ -1,5 +1,5 @@
 {
-  "name": "greptimedb-values-configurator",
+  "name": "greptimedb-enterprise-wizard",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

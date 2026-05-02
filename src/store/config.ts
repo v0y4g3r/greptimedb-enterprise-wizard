@@ -1,7 +1,7 @@
 import { reactive, watch } from 'vue'
 import type { AppConfig } from '../types/config'
 
-const STORAGE_KEY = 'greptimedb-configurator'
+const STORAGE_KEY = 'greptimedb-enterprise-wizard'
 
 const defaults: AppConfig = {
   clusterName: 'greptimedb',
