@@ -1,10 +1,20 @@
 <script setup lang="ts">
-import { computed, inject, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { config } from '../../store/config'
 import { isObjectStorageValid } from '../../validation/configValidation'
 import FormField from '../ui/FormField.vue'
 import RadioGroup from '../ui/RadioGroup.vue'
 import ToggleSwitch from '../ui/ToggleSwitch.vue'
+
+const useExistingSecret = ref(!!config.objectStorage.credentials.existingSecretName)
+watch(useExistingSecret, (val) => {
+  if (val) {
+    config.objectStorage.credentials.accessKeyId = ''
+    config.objectStorage.credentials.secretAccessKey = ''
+  } else {
+    config.objectStorage.credentials.existingSecretName = ''
+  }
+})
 
 const stepValid = computed(() => isObjectStorageValid(config.objectStorage))
 const setStepValid = inject<(step: number, valid: boolean) => void>('setStepValid')!
@@ -179,38 +189,46 @@ watch(stepValid, (valid) => setStepValid(4, valid), { immediate: true })
     <!-- Credentials (for all cloud providers) -->
     <div v-if="config.objectStorage.type !== 'none'" class="border border-gt-border rounded-lg p-4 space-y-4">
       <h3 class="text-sm font-semibold text-gt-purple">Credentials</h3>
-      <FormField label="Existing Secret Name" description="Use a pre-existing Kubernetes secret for credentials">
+      <ToggleSwitch
+        v-model="useExistingSecret"
+        label="Use existing Kubernetes secret"
+        description="Toggle on to reference a pre-existing secret, or off to input credentials directly"
+      />
+      <FormField v-if="useExistingSecret" label="Secret Name" description="Name of the Kubernetes secret containing storage credentials">
         <input
           v-model="config.objectStorage.credentials.existingSecretName"
           type="text"
           class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
+          placeholder="my-storage-credentials"
         />
       </FormField>
-      <div v-if="!config.objectStorage.credentials.existingSecretName && config.objectStorage.type === 'gcs'">
-        <FormField label="Service Account Key" required description="JSON-formatted base64 service account key">
-          <input
-            v-model="config.objectStorage.credentials.secretAccessKey"
-            type="password"
-            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
-          />
-        </FormField>
-      </div>
-      <div v-else-if="!config.objectStorage.credentials.existingSecretName" class="grid grid-cols-2 gap-4">
-        <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Name' : 'Access Key ID'" required>
-          <input
-            v-model="config.objectStorage.credentials.accessKeyId"
-            type="text"
-            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
-          />
-        </FormField>
-        <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Key' : config.objectStorage.type === 'oss' ? 'Access Key Secret' : 'Secret Access Key'" required>
-          <input
-            v-model="config.objectStorage.credentials.secretAccessKey"
-            type="password"
-            class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
-          />
-        </FormField>
-      </div>
+      <template v-else>
+        <div v-if="config.objectStorage.type === 'gcs'">
+          <FormField label="Service Account Key" required description="JSON-formatted base64 service account key">
+            <input
+              v-model="config.objectStorage.credentials.secretAccessKey"
+              type="password"
+              class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
+            />
+          </FormField>
+        </div>
+        <div v-else class="grid grid-cols-2 gap-4">
+          <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Name' : 'Access Key ID'" required>
+            <input
+              v-model="config.objectStorage.credentials.accessKeyId"
+              type="text"
+              class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
+            />
+          </FormField>
+          <FormField :label="config.objectStorage.type === 'azblob' ? 'Account Key' : config.objectStorage.type === 'oss' ? 'Access Key Secret' : 'Secret Access Key'" required>
+            <input
+              v-model="config.objectStorage.credentials.secretAccessKey"
+              type="password"
+              class="mt-1 block w-full rounded-md border-gt-border shadow-sm focus:border-gt-accent focus:ring-gt-accent sm:text-sm border p-2"
+            />
+          </FormField>
+        </div>
+      </template>
     </div>
 
     <!-- Cache -->
